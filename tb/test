@@ -1,0 +1,37 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "Użycie: $0 <nazwa_modułu>"
+    exit 1
+fi
+
+MODULE_NAME=$1
+TB_FILE="${MODULE_NAME}_tb.v"
+SRC_FILE="../${MODULE_NAME}.v"
+SIM_OUT="${MODULE_NAME}_sim"
+VCD_FILE="${MODULE_NAME}.vcd"
+
+if [ ! -f "$TB_FILE" ] || [ ! -f "$SRC_FILE" ]; then
+    echo "Błąd: Nie znaleziono plików $TB_FILE lub $SRC_FILE"
+    exit 1
+fi
+
+echo "--- Uruchamianie kompilacji i symulacji w Dockerze ---"
+
+# Dodane chown na końcu, aby pliki wynikowe należały do Ciebie, a nie do roota
+docker run --rm \
+    -v "$(pwd)":/work \
+    -v "$(dirname "$(pwd)")":/parent \
+    -w /work \
+    ubuntu:latest \
+    sh -c "apt-get update && apt-get install -y iverilog && iverilog -o $SIM_OUT $TB_FILE /parent/\$(basename \"$SRC_FILE\") && vvp $SIM_OUT && chown -R $(id -u):$(id -g) /work"
+
+if [ -f "$VCD_FILE" ]; then
+    echo "--- Uruchamianie GTKWave na systemie Fedora ---"
+    gtkwave "$VCD_FILE"
+else
+    echo "Błąd: Plik $VCD_FILE nie został wygenerowany."
+    echo "Sprawdź nazwę pliku w \$dumpfile(...) wewnątrz $TB_FILE"
+fi
+
+chown -R $USER:$USER ..

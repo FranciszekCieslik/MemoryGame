@@ -1,0 +1,10 @@
+/db
+/atom_netlists
+/incremental_db
+/output_files
+/.directory
+*.bak
+*_sim
+*.vcd
+*.qsf
+*.qpf
