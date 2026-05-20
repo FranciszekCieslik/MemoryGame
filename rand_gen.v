@@ -48,7 +48,7 @@ module rand_gen (
             case (current_state)
                 STATE_WAIT_START: begin
                     if (start) begin
-                        seq           <= 36'd0;
+                        seq           <= 36'hF_FFFF_FFFF;
                         gen_cnt       <= 4'd0;
                         current_state <= STATE_GEN_LEN_SEQ;
                     end
