@@ -5,8 +5,8 @@ input clk,
 input en,
 input [bit_num - 1 : 0] usr_in,
 input [bit_num - 1 : 0] mem_in,
-output no_equ,
-output equ
+output reg no_equ,
+output reg equ
 );
 
 always @(clk) begin

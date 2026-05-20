@@ -1,6 +1,5 @@
 module counter #(
-    parameter MODULO = 8,
-    localparam WIDTH = $clog2(MODULO)
+    parameter MODULO = 8
 )(
     input  wire             clk,
     input  wire             rstn,
@@ -9,7 +8,7 @@ module counter #(
     output reg  [WIDTH-1:0] out,
     output reg              is_max
 );
-
+    localparam WIDTH = $clog2(MODULO);
     // Logika licznika
     always @(posedge clk or negedge rstn) begin
         if (!rstn) begin

@@ -11,7 +11,7 @@ module debouncer #(
     reg [1:0] sync_reg;
 
     // Synchronizer and debounce counter
-    always @(posedge clk or negedge rst_n) begin
+    always @(posedge clk) begin
         sync_reg <= {sync_reg[0], button_in};
         if (sync_reg[1] != button_out) begin
             if (counter == MAX_COUNT) begin

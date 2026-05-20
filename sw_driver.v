@@ -1,15 +1,15 @@
 module sw_driver #(
     parameter CLK_FREQ    = 50_000_000,
     parameter DEBOUNCE_MS = 20,
-    parameter SW_NUM      = 9,
-    localparam WIDTH      = $clog2(SW_NUM)
+    parameter SW_NUM      = 9
 )(
     input  wire [SW_NUM-1:0] SW, 
     input  wire              clk,
     output reg               pressed,
     output reg  [WIDTH-1:0]  sw_idx
 );
-
+    localparam WIDTH      = $clog2(SW_NUM);
+    
     wire [SW_NUM-1:0] button_out;
     reg  [WIDTH-1:0]  next_idx;
     reg               any_pressed;
