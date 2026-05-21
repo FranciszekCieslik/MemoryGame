@@ -1,15 +1,16 @@
 module fsm(
 input wire clk,
 input wire [1:0] c,
-output reg CURRRENT_STATE
+output reg [2:0] CURRRENT_STATE
 );
 
-parameter S_GENERATE = 3'b000;
-parameter S_SHOW = 3'b001;
-parameter S_USER_INPUT = 3'b010;
-parameter S_COMPARE = 3'b011;
-parameter S_ERROR = 3'b100;
-parameter S_RESET = 3'b101;
+localparam S_RESET = 3'b000;
+localparam S_GENERATE = 3'b001;
+localparam S_SHOW = 3'b010;
+localparam S_USER_INPUT = 3'b011;
+localparam S_COMPARE = 3'b100;
+localparam S_ERROR = 3'b101;
+
 
 always @(posedge clk) begin
 
@@ -37,9 +38,7 @@ case (CURRRENT_STATE)
 			CURRRENT_STATE <= S_RESET;
 	S_RESET:
 		if (c == 2'b01)
-			CURRRENT_STATE <= S_SHOW;
-		else if (c == 2'b10)
-			CURRRENT_STATE <= S_RESET;
+			CURRRENT_STATE <= S_GENERATE;
 	default: CURRRENT_STATE = S_RESET;	
 endcase
 

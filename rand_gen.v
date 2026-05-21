@@ -3,6 +3,7 @@ module rand_gen (
     input  wire        en,
     input  wire        rst_n,
     input  wire        start,        // impuls 1-taktowy od FSM
+	 
     output reg [3:0]   len_seq,
     output reg         we,           // impuls zapisu: wysyłany dla każdego elementu
     output reg [3:0]   wdata,        // aktualnie wygenerowany element (4 bity)
