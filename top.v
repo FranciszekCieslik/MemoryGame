@@ -3,8 +3,8 @@ input wire CLK,
 input wire [9:0] SW,
 input wire KEY_0,
 output [9:0] LED,
-output reg [6:0] HEX0,
-output reg [6:0] HEX1
+output [6:0] HEX0,
+output [6:0] HEX1
 );
 
 wire [2:0] state;
@@ -22,6 +22,7 @@ wire sq_mem_re;
 wire [3:0]  sq_mem_raddr;      // adres rundy do odczytu (0..8)
 wire [3:0]  sq_mem_len_rdata;  // odczytana długość sekwencji dla danej rundy 
 wire [3:0]  sq_mem_rdata;       // odczytany element sekwencji (sekwencyjny) 
+wire last_element;
 // === iterator ===
 wire it_rst_n;
 wire it_start;
@@ -37,9 +38,20 @@ wire led_next_elem;
 // === sw_driver ===
 wire [8:0] sw_idx;
 wire sw_pressed;
-// === input dcounter ===
+// === input counter ===
 wire in_cnt_rstn;
 wire in_cnt_is_max;
+// === comparator ===
+wire comp_no_equ;
+wire comp_equ;
+// == lvl and error counters ==
+wire last_lvl;
+wire max_error; 
+wire lvl_cnt_out;
+wire error_cnt_out;
+wire error_cnt_rstn;
+wire lvl_cnt_rstn;
+wire lvl_cnt_inc;
 
 fsm u_fsm(
 .clk(CLK),
@@ -47,7 +59,7 @@ fsm u_fsm(
 .CURRRENT_STATE(state)
 );
 
-master_controller U_master_controller(
+master_controller u_master_controller(
 .clk(CLK),
 .CURRRENT_STATE(state),
 .rg_en(rg_en), 
@@ -57,7 +69,19 @@ master_controller U_master_controller(
 .it_start(it_start),
 .it_mode(it_mode),
 .it_done(it_done),
-.led_ready(led_ready)
+.led_ready(led_ready),
+.sw_pressed(sw_pressed),
+.comp_no_equ(comp_no_equ),
+.comp_equ(comp_equ),
+.last_element(last_element),
+.max_error(max_error),
+.sq_mem_rstn(sq_mem_rstn),
+.it_rst_n(it_rst_n),
+.led_rst_n(led_rst_n),
+.in_cnt_rstn(in_cnt_rstn),
+.error_cnt_rstn(error_cnt_rstn),
+.lvl_cnt_rstn(lvl_cnt_rstn),
+.lvl_cnt_inc(lvl_cnt_inc)
 );
 
 rand_gen u_rand_gen(
@@ -84,7 +108,8 @@ seq_memory u_seq_memory(
     .re(sq_mem_re),         // impuls/sygnał odczytu 
     .raddr(sq_mem_raddr),      // adres rundy do odczytu (0..8)
     .len_rdata(sq_mem_len_rdata),  // odczytana długość sekwencji dla danej rundy 
-    .rdata(sq_mem_rdata)      // odczytany element sekwencji (sekwencyjny) 
+    .rdata(sq_mem_rdata),      // odczytany element sekwencji (sekwencyjny) 
+    .last_element(last_element)
 );
 
 
@@ -143,7 +168,47 @@ counter #(
     .is_max(in_cnt_is_max)
 );
 
+comparator #(
+.bit_num(1'd4)
+) comp(
+.clk(CLK),
+.en(1'b0),
+.usr_in(sw_idx),
+.mem_in(it_out),
+.no_equ(comp_no_equ),
+.equ(comp_equ)
+);
 
+counter #(
+    .MODULO(3)
+) error_counter(
+    .clk(CLK),
+    .rstn(error_cnt_rstn),
+    .inc(comp_no_equ),
+    .mod_en(1'b1),
+    .out(error_cnt_out),
+    .is_max(max_error)
+);
 
+counter #(
+    .MODULO(9)
+) lvl_counter(
+    .clk(CLK),
+    .rstn(lvl_cnt_rstn),
+    .inc(lvl_cnt_inc),
+    .mod_en(1'b1),
+    .out(lvl_cnt_out),
+    .is_max(last_lvl)
+);
+
+_7seg_driver lvl_7seg(
+.in(lvl_cnt_out), 
+.seg(HEX1)
+);
+
+ _7seg_driver error_7seg(
+.in(error_cnt_out), 
+.seg(HEX0)
+);
 
 endmodule

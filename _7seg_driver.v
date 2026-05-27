@@ -1,10 +1,10 @@
 module _7seg_driver(
-input [3:0] hex, 
+input [3:0] in, 
 output reg [0:6] seg
 );
 
 always @(*)
-	case(hex)
+	case(in)
 		4'b0000: seg = 7'b0000001;
 		4'b0001: seg = 7'b1001111;
 		4'b0010: seg = 7'b0010010;

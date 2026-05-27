@@ -10,7 +10,8 @@ module seq_memory (
     input  wire        re,         // impuls/sygnał odczytu 
     input  wire [3:0]  raddr,      // adres rundy do odczytu (0..8)
     output reg  [3:0]  len_rdata,  // odczytana długość sekwencji dla danej rundy 
-    output reg  [3:0]  rdata       // odczytany element sekwencji (sekwencyjny) 
+    output reg  [3:0]  rdata,       // odczytany element sekwencji (sekwencyjny) 
+    output wire        last_element
 );
 
     // Pamięć 2D: [runda 0..8][element 0..8]
@@ -49,7 +50,7 @@ module seq_memory (
                 w_round_cnt          <= w_round_cnt + 4'd1; // Przejdź do kolejnej rundy
             end
 
-            // 2. Logika Odczytu (Niezmieniona)
+            // 2. Logika Odczytu 
             if (re) begin
                 if (r_element_cnt + 4'd1 < len_mem[raddr]) begin 
                     r_element_cnt <= r_element_cnt + 4'd1; 
@@ -72,5 +73,6 @@ module seq_memory (
             rdata     = 4'd0;
         end
     end
+    assign last_element = (re && (len_rdata > 4'd0)) ? (r_element_cnt == (len_rdata - 4'd1)) : 1'b0;
 
 endmodule
