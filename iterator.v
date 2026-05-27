@@ -3,7 +3,7 @@ module iterator (
     input wire        rst_n,
     input wire        start,         // impuls uruchamiający
     input wire        mode,          // 0: iteracja, 1: szybki skok (it)
-    input wire [7:0]  it,            // który globalny element zwrócić (dla mode=1)
+    input wire [5:0]  it,            // który globalny element zwrócić (dla mode=1)
     input wire        next_elem,     // NOWE: żądanie kolejnego elementu z drivera LED
 
     // Połączenia z pamięcią seq_memory

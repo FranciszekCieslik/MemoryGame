@@ -35,6 +35,10 @@ module master_controller(
     localparam S_COMPARE    = 3'b100;
     localparam S_ERROR      = 3'b101;
 
+    reg prev_gen;
+    always @(posedge clk) prev_gen <= (CURRRENT_STATE == S_GENERATE);
+    wire gen_entry = (CURRRENT_STATE == S_GENERATE) && !prev_gen;
+
     // Blok całkowicie kombinatoryczny - brak latchy dzięki wartościom domyślnym
     always @(*) begin
         // --- WARTOŚCI DOMYŚLNE ---
@@ -42,7 +46,6 @@ module master_controller(
         STATE_CONTROL   = 2'b00;
         rg_en           = 1'b0;
         rg_rst_n        = 1'b1; // Aktywne niskim (zakładam domyślnie 1 - brak resetu)
-        rg_start        = 1'b0;
         it_start        = 1'b0;
         it_mode         = 1'b0;
         sq_mem_rstn     = 1'b1;
@@ -56,19 +59,18 @@ module master_controller(
         case (CURRRENT_STATE)
 
             S_RESET: begin
-                sq_mem_rstn    = 1'b1;
-                it_rst_n       = 1'b1;
-                led_rst_n      = 1'b1;
-                in_cnt_rstn    = 1'b1;
-                error_cnt_rstn = 1'b1;
-                lvl_cnt_rstn   = 1'b1;
+                sq_mem_rstn    = 1'b0;
+                it_rst_n       = 1'b0;
+                led_rst_n      = 1'b0;
+                in_cnt_rstn    = 1'b0;
+                error_cnt_rstn = 1'b0;
+                lvl_cnt_rstn   = 1'b0;
                 STATE_CONTROL  = 2'b01; // Przejdź do GENERATE
             end
 
             S_GENERATE: begin
                 rg_en    = 1'b1;
                 rg_rst_n = 1'b0; // Wyzwolenie resetu generatora? (Jeśli tak było w oryginale)
-                rg_start = 1'b1;
                 it_start = 1'b0;
                 it_mode  = 1'b0;
                 if (rg_done) begin

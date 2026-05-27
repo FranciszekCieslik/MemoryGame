@@ -10,6 +10,7 @@ output [6:0] HEX1
 wire [2:0] state;
 wire [3:0] len_seq;
 wire [3:0] wdata;
+wire [1:0] state_ctrl;
 // === rand_reg ===
 wire rg_en;
 wire rg_rst_n;
@@ -30,13 +31,13 @@ wire it_mode;
 wire [3:0]  it_out;
 wire it_done;
 wire it_valid;
-wire [7:0]  it;
+wire [5:0]  it;
 // === led_driver ===
 wire led_ready;
 wire led_rst_n;
 wire led_next_elem;
 // === sw_driver ===
-wire [8:0] sw_idx;
+wire [3:0] sw_idx;
 wire sw_pressed;
 // === input counter ===
 wire in_cnt_rstn;
@@ -44,24 +45,26 @@ wire in_cnt_is_max;
 // === comparator ===
 wire comp_no_equ;
 wire comp_equ;
+wire comp_en;
 // == lvl and error counters ==
 wire last_lvl;
 wire max_error; 
-wire lvl_cnt_out;
-wire error_cnt_out;
+wire [3:0] lvl_cnt_out;
+wire [1:0] error_cnt_out;
 wire error_cnt_rstn;
 wire lvl_cnt_rstn;
 wire lvl_cnt_inc;
 
 fsm u_fsm(
 .clk(CLK),
-.c(SW[1:0]),
+.c(state_ctrl),
 .CURRRENT_STATE(state)
 );
 
 master_controller u_master_controller(
 .clk(CLK),
 .CURRRENT_STATE(state),
+.STATE_CONTROL(state_ctrl),
 .rg_en(rg_en), 
 .rg_rst_n(rg_rst_n),
 .rg_start(rg_start),
@@ -149,7 +152,7 @@ led_driver #(
 sw_driver #(
     .CLK_FREQ(50_000_000),
     .DEBOUNCE_MS(20),
-    .SW_NUM(9)
+    .SW_NUM(10)
 ) u_sw_driver(
     .SW(SW), 
     .clk(CLK),
@@ -168,11 +171,13 @@ counter #(
     .is_max(in_cnt_is_max)
 );
 
+assign comp_en = sw_pressed;
+
 comparator #(
-.bit_num(1'd4)
+    .bit_num(3'd4)
 ) comp(
 .clk(CLK),
-.en(1'b0),
+.en(comp_en),
 .usr_in(sw_idx),
 .mem_in(it_out),
 .no_equ(comp_no_equ),
@@ -206,8 +211,8 @@ _7seg_driver lvl_7seg(
 .seg(HEX1)
 );
 
- _7seg_driver error_7seg(
-.in(error_cnt_out), 
+_7seg_driver error_7seg(
+.in({2'b00,error_cnt_out}), 
 .seg(HEX0)
 );
 

@@ -1,5 +1,5 @@
 module comparator #(
-parameter bit_num = 1'd4
+parameter bit_num = 3'd4
 )(
 input clk,
 input en,
@@ -9,16 +9,18 @@ output reg no_equ,
 output reg equ
 );
 
-always @(clk) begin
-
-if(!en) begin
-    if (usr_in == mem_in) begin
-        no_equ <= 1'b0;
-        equ <= 1'b1;
+always @(posedge clk) begin
+    if (en) begin       // en=1 → porównuj
+        if (usr_in == mem_in) begin
+            no_equ <= 1'b0;
+            equ    <= 1'b1;
+        end else begin
+            no_equ <= 1'b1;
+            equ    <= 1'b0;
+        end
     end else begin
-        no_equ <= 1'b1;
-        equ <= 1'b0;
+        no_equ <= 1'b0;
+        equ    <= 1'b0;
     end
-end
 end
 endmodule

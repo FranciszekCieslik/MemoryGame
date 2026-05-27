@@ -19,7 +19,7 @@ module counter #(
                 if (mod_en && (out == MODULO - 1)) begin
                     out <= 0;
                 end else begin
-                    out <= out + 1'b01;
+                    out <= out + 1;
                 end
             end
             
