@@ -1,0 +1,56 @@
+#!/bin/bash
+
+if [ -z "$1" ]; then
+    echo "Użycie: $0 <nazwa_modułu>"
+    exit 1
+fi
+
+MODULE_NAME=$1
+TB_FILE="${MODULE_NAME}_tb.v"
+SIM_OUT="${MODULE_NAME}_sim"
+VCD_FILE="${MODULE_NAME}.vcd"
+
+# Sprawdzenie czy plik testbench istnieje w bieżącym folderze (tb/)
+if [ ! -f "$TB_FILE" ]; then
+    echo "Błąd: Nie znaleziono pliku testbench: $TB_FILE"
+    exit 1
+fi
+
+echo "--- Uruchamianie kompilacji i symulacji w Dockerze ---"
+
+# Usuwamy flagę --user z docker run, aby apt-get mogło zainstalować iverilog jako root.
+# Naprawę uprawnień dla plików wynikowych robi dedykowane polecenie chown na końcu kontenera.
+docker run --rm \
+    -v "$(dirname "$(pwd)")":/work \
+    -w /build \
+    ubuntu:latest \
+    sh -c "
+        apt-get update && apt-get install -y iverilog && \
+        
+        # 1. Kopiowanie pliku testbench z folderu /work/tb/
+        cp /work/tb/$TB_FILE . && \
+        
+        # 2. Kopiowanie WSZYSTKICH plików .v z głównego folderu /work/
+        cp /work/*.v . && \
+        
+        # 3. Kompilacja wszystkich skopiowanych plików .v w standardzie SystemVerilog
+        iverilog -g2012 -o $SIM_OUT *.v && \
+        
+        # 4. Uruchomienie symulacji (wygeneruje plik .vcd w /build)
+        vvp $SIM_OUT && \
+        
+        # 5. Skopiowanie gotowego pliku .vcd z powrotem do folderu tb/ na hoście
+        if [ -f \"$VCD_FILE\" ]; then cp \"$VCD_FILE\" /work/tb/; fi && \
+        
+        # 6. Zmiana właściciela wygenerowanego pliku .vcd na Twojego użytkownika
+        chown $(id -u):$(id -g) /work/tb/$VCD_FILE
+    "
+
+# Sprawdzamy czy plik .vcd pojawił się na dysku lokalnym hościa
+if [ -f "$VCD_FILE" ]; then
+    echo "--- Uruchamianie GTKWave na systemie Fedora ---" 
+    gtkwave "$VCD_FILE" 
+else
+    echo "Błąd: Plik $VCD_FILE nie został wygenerowany." 
+    echo "Sprawdź logi kompilacji iverilog powyżej."
+fi
