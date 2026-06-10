@@ -2,7 +2,7 @@ module fsm(
 input wire clk,
 input wire rst,
 input wire [1:0] c,
-output reg [2:0] CURRENT_STATE   // FIX: literówka CURRRENT → CURRENT
+output reg [2:0] CURRENT_STATE
 );
 
 localparam S_RESET      = 3'b000;
@@ -12,8 +12,7 @@ localparam S_USER_INPUT = 3'b011;
 localparam S_COMPARE    = 3'b100;
 localparam S_ERROR      = 3'b101;
 
-// FIX: always @(posedge clk or posedge rst) — poprzednio tylko @(posedge rst),
-//      przez co gałąź else (case) nigdy się nie wykonywała.
+
 always @(posedge clk or posedge rst) begin
     if (rst) begin
         CURRENT_STATE <= S_RESET;

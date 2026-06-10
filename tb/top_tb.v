@@ -1,22 +1,15 @@
 `timescale 1ns/1ps
-// =============================================================
-//  top_tb_fixed.v  – Testbench Memory Game
-//  CLK_FREQ=20 → led_driver: ONE_SECOND=20 cykli → 1 element=40 cykli
-//               debouncer:  MAX_COUNT=0 → pass-through (2 cykle sync)
-//  Watchdog: 5_000_000 ns = 250_000 cykli @ 20ns/cykl
-// =============================================================
+
 
 module top_tb;
 
-    localparam SIM_CLK = 20;   // CLK_FREQ przekazywany do DUT
-
+    localparam SIM_CLK = 20; 
     reg        CLK;
     reg [9:0]  SW;
     reg        KEY_0, KEY_1, KEY_2, KEY_3;
     wire [9:0] LED;
     wire [6:0] HEX0,HEX1,HEX2,HEX3,HEX4,HEX5;
 
-    // FIX: top z parametrem CLK_FREQ=20 zamiast hardkodowanego 50M
     top #(
         .CLK_FREQ(SIM_CLK)
     ) dut (
@@ -73,14 +66,12 @@ module top_tb;
         end
     endtask
 
-    // press_switch: debouncer z CLK_FREQ=20,DEBOUNCE_MS=20 → MAX_COUNT=0
-    // sync_reg potrzebuje 2 cykli → trzymamy SW min 4 cykle
     task press_switch;
         input [3:0] idx;
         begin
-            if (idx <= 4'd8) begin  // SW[0..8] obsługiwane przez sw_driver
+            if (idx <= 4'd8) begin  
                 SW = (10'b1 << idx);
-                wait_clk(6);        // ≥ 2 cykle sync + 1 cykl edge detection + margines
+                wait_clk(6);
                 SW = 10'b0;
                 wait_clk(4);
             end else begin
@@ -204,8 +195,8 @@ module top_tb;
             wait_for_state(S_USER_INPUT, 350);
             prev_err = dut.error_count;
 
-            wrong = (read_mem(0,1) == 4'd0) ? 4'd1 : 4'd0; // zawsze inna niż mem
-            if (wrong > 4'd8) wrong = 4'd0;                 // zawsze w zakresie SW
+            wrong = (read_mem(0,1) == 4'd0) ? 4'd1 : 4'd0; 
+            if (wrong > 4'd8) wrong = 4'd0;
             $display("       Wartość w pamięci=%0h, podajemy=%0h", read_mem(0,1), wrong);
 
             press_switch(wrong[2:0]);

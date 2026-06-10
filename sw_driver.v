@@ -5,10 +5,9 @@ module sw_driver #(
     input  wire        clk,
     output reg         pressed,
     input  wire [9:0]  SW,
-    output reg  [3:0]  sw_idx   // FIX: 4 bity — obsługujemy SW[0..9] (10 przełączników)
+    output reg  [3:0]  sw_idx
 );
 
-// FIX: SW_NUM=10, WIDTH=4 — wszystkie 10 przełączników, indeksy 0..9
 localparam SW_NUM = 10;
 localparam WIDTH  = 4;   // $clog2(10) = 4
 

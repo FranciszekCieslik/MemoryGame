@@ -9,7 +9,7 @@ module iterator (
 
     // Interfejs do pamięci
     output wire        re,
-    output wire [6:0]  mem_addr,       // FIX: 7 bitów — {level[3:0], elem[2:0]}
+    output wire [6:0]  mem_addr, 
     input wire  [3:0]  rdata,
 
     // Wyjścia
@@ -28,7 +28,6 @@ module iterator (
     reg [2:0] elem_counter;
     reg       wait_for_driver;
 
-    // FIX: addr = {level[3:0], elem[2:0]} = 7 bitów
     assign re = (current_state == S_COMPARE);
     assign mem_addr =
         (current_state == S_COMPARE)

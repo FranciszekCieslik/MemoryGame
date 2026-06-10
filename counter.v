@@ -9,7 +9,6 @@ module counter #(
 );
     localparam WIDTH = $clog2(MODULO);
 
-    // FIX: reset asynchroniczny z prawidłową listą sensytywności
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             out    <= 0;

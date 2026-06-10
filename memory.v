@@ -4,14 +4,10 @@ input wire rst,
 input wire we,
 input wire [3:0] data_in,
 input wire re,
-input wire [6:0] addr,      // FIX: 7 bitów — {level[3:0], elem[2:0]}
+input wire [6:0] addr,
 output wire [3:0] data_out
 );
 
-// FIX: wymiary dopasowane do rzeczywistego użycia:
-//   dim1 [0:8]  — 9 poziomów (sekwencji),  adresowane przez addr[6:3] (4 bity, max=8)
-//   dim2 [0:6]  — sloty 0..6, używamy 1..6, adresowane przez addr[2:0] (3 bity, max=6)
-// Eliminuje ostrzeżenie "index expression is not wide enough"
 reg [3:0] seq_mem [0:8][0:6];
 reg [5:0] amount_of_elements;
 

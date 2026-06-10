@@ -35,7 +35,6 @@ always @(posedge clk or posedge rst) begin
     end
 end
 
-// FIX: blok kombinacyjny używa przypisań blokujących (=), nie nieblokujących (<=)
 always @(*) begin
     c            = 2'b00;
     reset_signal = 1'b0;
@@ -68,27 +67,21 @@ always @(*) begin
                 c = 2'b01;
         end
 
-        // FIX: usunięto błędne 'c = 2'b00' które nadpisywało prawidłową wartość c
-        //      gdy comp_equ == 1. Teraz logika jest rozłączna.
         S_COMPARE: begin
             if (comp_no_equ) begin
-                c = 2'b10;                    // błąd → S_ERROR
+                c = 2'b10;                    
             end else if (comp_equ) begin
                 if (input_number == 3'd5)
-                    c = 2'b01;                // koniec sekwencji → S_SHOW (nowy poziom)
-                else
-                    c = 2'b11;                // kolejny element → S_USER_INPUT
+                    c = 2'b01;               
+                c = 2'b11;               
             end
-            // else c = 2'b00 (domyślne) — czekamy na wynik
         end
 
-        // FIX: S_ERROR sprawdza error_count — daje kolejną szansę zamiast
-        //      bezwarunkowo resetować grę (poprzednio zawsze c=2'b10)
         S_ERROR: begin
-            if (error_count == 2'd3)  // FIX: == 3 (po 3 błędach counter osiąga 3 przy MODULO=4)
-                c = 2'b10;   // 3 błędy → S_RESET
+            if (error_count == 2'd3)  
+                c = 2'b10;
             else
-                c = 2'b01;   // zostały próby → S_SHOW (pokaż sekwencję ponownie)
+                c = 2'b01;
         end
 
         default: c = 2'b00;

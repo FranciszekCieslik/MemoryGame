@@ -10,7 +10,7 @@ output reg equ
 );
 
 always @(posedge clk) begin
-    if (en) begin       // en=1 → porównuj
+    if (en) begin
         if (usr_in == mem_in) begin
             no_equ <= 1'b0;
             equ    <= 1'b1;

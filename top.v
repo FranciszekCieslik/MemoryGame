@@ -14,7 +14,7 @@ output [6:0] HEX4,
 output [6:0] HEX5
 );
 
-wire [3:0] last_sw;           // 4 bity — indeksy 0..9
+wire [3:0] last_sw;
 wire [2:0] current_state;
 wire [3:0] current_level;
 wire [1:0] controller_signals;
@@ -24,16 +24,10 @@ wire [2:0] input_number;
 wire LED_ready;
 wire [7:0] lfsr_out;
 
-// FIX: wartości gry 0..9 (10 LED, 10 SW)
-// lfsr_out[3:0] daje 0..15. Redukcja do 0..9:
-//   jeśli raw > 9 → raw - 10 (mapuje 10→0, 11→1, ..., 15→5)
-// Rozkład: 0..9 bezpośrednio (10 wartości) + 10..15 → 0..5 (6 wartości)
-// Nie jest idealnie równomierny, ale prosty i syntezowalny.
-// Dla lepszej równomierności można użyć tylko [3:0] z pomijaniem >9 (kosztem cykli).
 wire [3:0] lfsr_raw = lfsr_out[3:0];
 wire [3:0] mem_data_in = (lfsr_raw > 4'd9) ? (lfsr_raw - 4'd10) : lfsr_raw;
 
-wire [6:0] iter_mem_addr;    // FIX: 7 bitów
+wire [6:0] iter_mem_addr;
 wire       iter_re;
 wire [3:0] iter_out;
 wire       iter_show_done;
@@ -41,7 +35,7 @@ wire [3:0] mem_data_out;
 wire comp_no_equ;
 wire comp_equ;
 wire sw_pressed_raw;
-wire [3:0] sw_idx_raw;       // FIX: 4 bity — indeksy 0..9
+wire [3:0] sw_idx_raw;
 
 wire ctrl_lfsr_en;
 wire ctrl_mem_we;
@@ -56,11 +50,10 @@ always @(posedge CLK or posedge KEY_0)
 
 wire sw_edge = sw_pressed_raw & ~sw_pressed_d;
 
-// last_sw: rejestruje indeks w chwili zbocza naciśnięcia
 reg [3:0] last_sw_reg;
 always @(posedge CLK or posedge KEY_0)
     if (KEY_0)        last_sw_reg <= 4'b0;
-    else if (sw_edge) last_sw_reg <= sw_idx_raw;  // sw_idx_raw już jest [3:0]
+    else if (sw_edge) last_sw_reg <= sw_idx_raw;
 
 assign last_sw = last_sw_reg;
 
@@ -104,7 +97,7 @@ sw_driver #(
     .clk(CLK),
     .pressed(sw_pressed_raw),
     .SW(SW),
-    .sw_idx(sw_idx_raw)      // [3:0] — 10 przełączników
+    .sw_idx(sw_idx_raw)
 );
 
 led_driver #(
@@ -168,7 +161,7 @@ memory u_memory (
     .we(ctrl_mem_we),
     .data_in(mem_data_in),
     .re(iter_re),
-    .addr(iter_mem_addr),    // [6:0]
+    .addr(iter_mem_addr),
     .data_out(mem_data_out)
 );
 
@@ -180,7 +173,7 @@ iterator u_iterator (
     .input_number(input_number),
     .next_elem(LED_ready),
     .re(iter_re),
-    .mem_addr(iter_mem_addr), // [6:0]
+    .mem_addr(iter_mem_addr),
     .rdata(mem_data_out),
     .out(iter_out),
     .valid(),
